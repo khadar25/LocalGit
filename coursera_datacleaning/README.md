@@ -1,39 +1,142 @@
-# Getting and Cleaning Data Project
-Author: Michael Galarnyk <br />
-Blog Post: [Getting and Cleaning Data Review](https://medium.com/@GalarnykMichael/review-course-1-the-data-scientists-toolbox-jhu-coursera-4d7459458821#.5jpg133ln "Click to go to Repo") <br />
-Data Zip File Location: [UC Irvine Repo](https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip "Clicking will download the data")
+## Exploratory Data Analysis Project 1
 
-## Goal of the Project
-1. A tidy data set 
-2. A link to a Github repository with your script for performing the analysis 
-3. A code book that describes the variables, the data, and any transformations or work that you performed to clean up the data called CodeBook.md. You should also include a README.md in the repo with your scripts. This repo explains how all of the scripts work and how they are connected.
-4. Analysis R Script
+This assignment uses data from the UC Irvine Machine Learning Repository, a popular repository for machine learning datasets. In particular, we will be using the “Individual household electric power consumption Data Set” which I have made available on the course web site:
 
-## Review Criteria
+Dataset:
+[Electric power consumption](https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2Fhousehold_power_consumption.zip) [20Mb]
+</br>Description: Measurements of electric power consumption in one household with a one-minute sampling rate over a period of almost 4 years. Different electrical quantities and some sub-metering values are available.
+```R
+library("data.table")
 
-Goal | Item | Link to Item
---- | --- | ---
-Analysis R Script |  run_analysis.R |  [R Script Link](https://github.com/mGalarnyk/datasciencecoursera/blob/master/3_Getting_and_Cleaning_Data/projects/run_analysis.R "run_analysis.R")
-Tidy Data Set |  Clean Data Set |  [Data Set Link](https://github.com/mGalarnyk/datasciencecoursera/blob/master/3_Getting_and_Cleaning_Data/data/tidyData.txt "tidyData.txt")
-Github Repo | Repo |  [Repo Link](https://github.com/mGalarnyk/datasciencecoursera/tree/master/3_Getting_and_Cleaning_Data "Click to go to Repo")
-Cookbook | CodeBook.md |  [Repo Link](https://github.com/mGalarnyk/datasciencecoursera/blob/master/3_Getting_and_Cleaning_Data/projects/CodeBook.md "CodeBook.md")
-README | ReadingItNow |  [Repo Link](https://github.com/mGalarnyk/datasciencecoursera/blob/master/3_Getting_and_Cleaning_Data/projects/README.md "README.md")
+setwd("~/Desktop/datasciencecoursera/4_Exploratory_Data_Analysis/project/data")
 
-## Contributors
+#Reads in data from file then subsets data for specified dates
+powerDT <- data.table::fread(input = "household_power_consumption.txt"
+                             , na.strings="?"
+                             )
 
-FirstName | LastName | Email
---- | --- | ---
-Michael |  Galarnyk |  <mgalarny@gmail.com>
-Submit |  Pull Request | <youremailhere@gmail.com>
+# Prevents histogram from printing in scientific notation
+powerDT[, Global_active_power := lapply(.SD, as.numeric), .SDcols = c("Global_active_power")]
 
-## License
+# Change Date Column to Date Type
+powerDT[, Date := lapply(.SD, as.Date, "%d/%m/%Y"), .SDcols = c("Date")]
 
-Anyone may contribute after this assignment is turned in and graded. 
+# Filter Dates for 2007-02-01 and 2007-02-02
+powerDT <- powerDT[(Date >= "2007-02-01") & (Date <= "2007-02-02")]
 
-## Blog Posts on the Specialization | John Hopkins Coursera
+png("plot1.png", width=480, height=480)
 
-[Getting and Cleaning Data (JHU Coursera)](https://medium.com/@GalarnykMichael/getting-and-cleaning-data-jhu-coursera-course-3-c3635747858b#.y93kqfa0u "Review + data.table")
+## Plot 1
+hist(powerDT[, Global_active_power], main="Global Active Power", 
+     xlab="Global Active Power (kilowatts)", ylab="Frequency", col="Red")
 
-[R Programming (JHU Coursera)](https://medium.com/@GalarnykMichael/in-progress-review-course-2-r-programming-jhu-coursera-ad27086d8438#.bzzr29fvo "Review + data.table")
+dev.off()
+```
+![](https://github.com/mGalarnyk/datasciencecoursera/blob/master/4_Exploratory_Data_Analysis/project1/plot1.png)
+```R
+library("data.table")
 
-[The Data Scientistâ€™s Toolbox (JHU Coursera)](https://medium.com/@GalarnykMichael/review-course-1-the-data-scientists-toolbox-jhu-coursera-4d7459458821#.5jpg133ln "Review + Going over Parts of Quiz")
+setwd("~/Desktop/datasciencecoursera/4_Exploratory_Data_Analysis/project/data")
+
+#Reads in data from file then subsets data for specified dates
+powerDT <- data.table::fread(input = "household_power_consumption.txt"
+                             , na.strings="?"
+)
+
+# Prevents Scientific Notation
+powerDT[, Global_active_power := lapply(.SD, as.numeric), .SDcols = c("Global_active_power")]
+
+# Making a POSIXct date capable of being filtered and graphed by time of day
+powerDT[, dateTime := as.POSIXct(paste(Date, Time), format = "%d/%m/%Y %H:%M:%S")]
+
+# Filter Dates for 2007-02-01 and 2007-02-02
+powerDT <- powerDT[(dateTime >= "2007-02-01") & (dateTime < "2007-02-03")]
+
+png("plot2.png", width=480, height=480)
+
+## Plot 2
+plot(x = powerDT[, dateTime]
+     , y = powerDT[, Global_active_power]
+     , type="l", xlab="", ylab="Global Active Power (kilowatts)")
+
+dev.off()
+```
+![](https://github.com/mGalarnyk/datasciencecoursera/blob/master/4_Exploratory_Data_Analysis/project1/plot2.png)
+```R
+library("data.table")
+
+setwd("~/Desktop/datasciencecoursera/4_Exploratory_Data_Analysis/project/data")
+
+#Reads in data from file then subsets data for specified dates
+powerDT <- data.table::fread(input = "household_power_consumption.txt"
+                             , na.strings="?"
+)
+
+# Prevents Scientific Notation
+powerDT[, Global_active_power := lapply(.SD, as.numeric), .SDcols = c("Global_active_power")]
+
+# Making a POSIXct date capable of being filtered and graphed by time of day
+powerDT[, dateTime := as.POSIXct(paste(Date, Time), format = "%d/%m/%Y %H:%M:%S")]
+
+# Filter Dates for 2007-02-01 and 2007-02-02
+powerDT <- powerDT[(dateTime >= "2007-02-01") & (dateTime < "2007-02-03")]
+
+png("plot3.png", width=480, height=480)
+
+# Plot 3
+plot(powerDT[, dateTime], powerDT[, Sub_metering_1], type="l", xlab="", ylab="Energy sub metering")
+lines(powerDT[, dateTime], powerDT[, Sub_metering_2],col="red")
+lines(powerDT[, dateTime], powerDT[, Sub_metering_3],col="blue")
+legend("topright"
+       , col=c("black","red","blue")
+       , c("Sub_metering_1  ","Sub_metering_2  ", "Sub_metering_3  ")
+       ,lty=c(1,1), lwd=c(1,1))
+
+dev.off()
+```
+![](https://github.com/mGalarnyk/datasciencecoursera/blob/master/4_Exploratory_Data_Analysis/project1/plot3.png)
+```R
+library("data.table")
+
+setwd("~/Desktop/datasciencecoursera/4_Exploratory_Data_Analysis/project/data")
+
+#Reads in data from file then subsets data for specified dates
+powerDT <- data.table::fread(input = "household_power_consumption.txt"
+                             , na.strings="?"
+)
+
+# Prevents Scientific Notation
+powerDT[, Global_active_power := lapply(.SD, as.numeric), .SDcols = c("Global_active_power")]
+
+# Making a POSIXct date capable of being filtered and graphed by time of day
+powerDT[, dateTime := as.POSIXct(paste(Date, Time), format = "%d/%m/%Y %H:%M:%S")]
+
+# Filter Dates for 2007-02-01 and 2007-02-02
+powerDT <- powerDT[(dateTime >= "2007-02-01") & (dateTime < "2007-02-03")]
+
+png("plot4.png", width=480, height=480)
+
+par(mfrow=c(2,2))
+
+# Plot 1
+plot(powerDT[, dateTime], powerDT[, Global_active_power], type="l", xlab="", ylab="Global Active Power")
+
+# Plot 2
+plot(powerDT[, dateTime],powerDT[, Voltage], type="l", xlab="datetime", ylab="Voltage")
+
+# Plot 3
+plot(powerDT[, dateTime], powerDT[, Sub_metering_1], type="l", xlab="", ylab="Energy sub metering")
+lines(powerDT[, dateTime], powerDT[, Sub_metering_2], col="red")
+lines(powerDT[, dateTime], powerDT[, Sub_metering_3],col="blue")
+legend("topright", col=c("black","red","blue")
+       , c("Sub_metering_1  ","Sub_metering_2  ", "Sub_metering_3  ")
+       , lty=c(1,1)
+       , bty="n"
+       , cex=.5) 
+
+# Plot 4
+plot(powerDT[, dateTime], powerDT[,Global_reactive_power], type="l", xlab="datetime", ylab="Global_reactive_power")
+
+dev.off()
+```
+![](https://github.com/mGalarnyk/datasciencecoursera/blob/master/4_Exploratory_Data_Analysis/project1/plot4.png)
