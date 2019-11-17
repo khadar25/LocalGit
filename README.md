@@ -1,2 +1,3 @@
-# LocalGit
-cousera - datascience 
+# cousera 
+
+Basic understanding on datascience
